@@ -25,11 +25,11 @@ python task.py <path-to-log-file>
 - Line‑by‑line processing – works with huge log files without memory issues.
 - Malformed or incomplete lines are counted and skipped, never causing a crash.
 - Key metrics:
--- Total valid requests
--- Number of malformed lines
--- Unique IP addresses
--- Error rate (percentage of 4xx and 5xx responses)
--- Top 10 endpoints – the most frequently requested paths.
+ - Total valid requests
+ - Number of malformed lines
+ - Unique IP addresses
+ - Error rate (percentage of 4xx and 5xx responses)
+ - Top 10 endpoints – the most frequently requested paths.
 
 ## Important Design Decisions
 1. Standard Library Only
