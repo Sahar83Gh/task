@@ -1,9 +1,11 @@
 # regex for log parsing
 # sys for managing input file and error
 # counter for finding 10 top end points
+# datetime for extracting hour
 import re
 import sys
 from collections import Counter
+from datetime import datetime
 
 # Regular expression for log format
 # Example line:
@@ -43,6 +45,26 @@ def parse_line(line):
 
     return data
 
+def extract_hour(timestamp_str):
+    """
+    Extract the hour (0-23) from the timestamp string.
+    Timestamp format: [01/Jun/2026:09:14:22 +0000]
+    Returns hour as integer, or None if parsing fails.
+    """
+    try:
+        # split timestamp and parse the date/time part (we don't need timezone part)
+        dt_part = timestamp_str.split()[0]  # "01/Jun/2026:09:14:22"
+        # datetime.strptime for parsing
+        # %d day zero-padded
+        # %b abbreviated month name
+        # %Y year with century
+        # %H hour (24-hour clock) zero-padded
+        # %M minute zero-padded
+        # %S second zero-padded
+        dt = datetime.strptime(dt_part, "%d/%b/%Y:%H:%M:%S")
+        return dt.hour
+    except Exception:
+        return None
 
 def main():
     if len(sys.argv) < 2:
@@ -57,6 +79,7 @@ def main():
     unique_ips = set()
     endpoint_counter = Counter()
     status_codes = []
+    hourly_counter = Counter()
 
     try:
         with open(logfile, 'r', encoding='utf-8') as input:
@@ -78,6 +101,15 @@ def main():
                 unique_ips.add(ip)
                 endpoint_counter[path] += 1
                 status_codes.append(status)
+
+                # Hourly distribution
+                hour = extract_hour(timestamp)
+                if hour is not None:
+                    hourly_counter[hour] += 1
+                else:
+                    # If timestamp is invalid, treat this line as bad
+                    total_requests -= 1
+                    bad_lines += 1
 
     except FileNotFoundError:
         print(f"Error: File '{logfile}' not found.", file=sys.stderr)
@@ -101,9 +133,21 @@ def main():
     print(f"Malformed lines: {bad_lines:,}")
     print(f"Unique IP addresses: {len(unique_ips):,}")
     print(f"Error rate (4xx/5xx): {error_rate:.2f}%")
+    # {count:8,} means that print count in 8 characters and with thousands separator
     print("\n--- Top 10 endpoints ---")
     for i, (endpoint, count) in enumerate(top_endpoints, 1):
         print(f"{i:2}. {endpoint[:40]:40} {count:8,} requests")
+    # Display a simple histogram
+    if hourly_counter:
+        max_count = max(hourly_counter.values()) if hourly_counter else 1
+        for hour in range(24):
+            # count default zero
+            count = hourly_counter.get(hour, 0)
+            bar_len = int(20 * count / max_count)
+            bar = '▨' * bar_len
+            print(f"{hour:02}:00 - {hour+1:02}:00  {count:6,}  {bar}")
+    else:
+        print("No hourly data available.")
     print("="*50 + "\n")
 
 
