@@ -1,0 +1,7 @@
+1.1.1.1 - - [01/Jun/2026:09:00:00 +0000] "GET /home HTTP/1.1" 200 100 "-" "Mozilla"
+2.2.2.2 - - [01/Jun/2026:10:00:00 +0000] "GET /admin HTTP/1.1" 404 200 "-" "Chrome"
+malformed line without proper format
+1.1.1.1 - - [01/Jun/2026:09:00:00 +0000] "GET /home HTTP/1.1" 500 150 "-" "Mozilla"
+3.3.3.3 - - [01/Jun/2026:11:00:00 +0000] "GET /login HTTP/1.1" 403 300 "-" "Safari"
+2.2.2.2 - - [01/Jun/2026:10:00:00 +0000] "GET /home HTTP/1.1" 200 120 "-" "Chrome"
+another bad line with missing ip - - [01/Jun/2026:10:00:00] "GET /test" 200
